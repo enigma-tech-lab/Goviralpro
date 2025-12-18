@@ -125,7 +125,7 @@ async def send_pro_upgrade_message(update: Update, context: ContextTypes.DEFAULT
     
     target = update.callback_query if update.callback_query else update.message
     message_text = (
-        f"🚫 **{feature_name} is a PRO Feature** 💎\n\n"
+        f"🚫 {feature_name} is a PRO Feature 💎\n\n"
         "Upgrade to PRO to access:\n"
         "• AI Content Consultant\n"
         "• Scout Bounties\n"
@@ -176,15 +176,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Help command handler"""
     await update.message.reply_text(
-        "❓ **How to Use GoViral Pro**\n\n"
-        "**Shortcuts:**\n"
+        "❓ How to Use GoViral Pro\n\n"
+        "SHORTCUTS:\n"
         "/analyze - Start analyzing content (Free)\n"
         "/generate - Start generating content (Free)\n"
         "/chat - Talk to the AI Consultant (PRO)\n"
         "/bounties - View Bounty Scout (PRO)\n"
         "/cancel - Cancel current action\n"
         "/skip - Generate ideas (in Generate Mode)\n\n"
-        "**Features:**\n"
+        "FEATURES:\n"
         "✨ Analyze: Improve hooks & virality (Free/PRO)\n"
         "🎨 Generate: Create articles & threads (Free/PRO)\n"
         "💡 Consultant: Strategic advice (PRO Only)\n"
@@ -204,7 +204,7 @@ async def analyze_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     tier_label = "" if is_pro else " (Draft Level)"
-    await update.message.reply_text(f"✨ **Analyze Mode**{tier_label}\n\nChoose format:", reply_markup=reply_markup)
+    await update.message.reply_text(f"✨ Analyze Mode{tier_label}\n\nChoose format:", reply_markup=reply_markup)
 
 async def generate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Shortcut for Generate mode"""
@@ -219,7 +219,7 @@ async def generate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     tier_label = "" if is_pro else " (Draft Level)"
-    await update.message.reply_text(f"🎨 **Generate Mode**{tier_label}\n\nWhat format?", reply_markup=reply_markup)
+    await update.message.reply_text(f"🎨 Generate Mode{tier_label}\n\nWhat format?", reply_markup=reply_markup)
 
 async def chat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Shortcut for Chat mode (PRO Only)"""
@@ -231,7 +231,7 @@ async def chat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_states[user_id] = {'mode': 'chat', 'history': []}
     
     await update.message.reply_text(
-        "💡 **AI Content Consultant - PRO MODE 💎**\n\n"
+        "💡 AI Content Consultant - PRO MODE 💎\n\n"
         "I am your dedicated AI Content Consultant.\n"
         "Ask me for strategy, critique, ideas, or analysis.\n\n"
         "Use /start to return to menu."
@@ -245,9 +245,9 @@ async def bounties_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
         
     await update.message.reply_text(
-        "🎯 **Scout Bounties - PRO Feature 💎**\n\n"
+        "🎯 Scout Bounties - PRO Feature 💎\n\n"
         "This feature helps you find and track X/Twitter thread contests and bounties.\n\n"
-        "**PRO features:**\n"
+        "PRO FEATURES:\n"
         "• Real-time bounty alerts\n"
         "• Auto-scout trending contests\n"
         "• Prize tracking"
@@ -346,7 +346,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         user_states[user_id] = {'mode': 'chat', 'history': []}
         await query.edit_message_text(
-            "💡 **AI Content Consultant - PRO MODE 💎**\n\n"
+            "💡 AI Content Consultant - PRO MODE 💎\n\n"
             "I am your dedicated AI Content Consultant.\n"
             "Ask me for strategy, critique, ideas, or analysis.\n\n"
             "Use /start to return to menu."
@@ -358,9 +358,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
             
         await query.edit_message_text(
-            "🎯 **Scout Bounties - PRO Feature 💎**\n\n"
+            "🎯 Scout Bounties - PRO Feature 💎\n\n"
             "This feature helps you find and track X/Twitter thread contests and bounties.\n\n"
-            "**PRO features:**\n"
+            "PRO FEATURES:\n"
             "• Real-time bounty alerts\n"
             "• Auto-scout trending contests\n"
             "• Prize tracking",
@@ -369,15 +369,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
     elif data == 'help':
         await query.message.reply_text(
-            "❓ **How to Use GoViral Pro**\n\n"
-            "**Shortcuts:**\n"
+            "❓ How to Use GoViral Pro\n\n"
+            "SHORTCUTS:\n"
             "/analyze - Start analyzing content (Free)\n"
             "/generate - Start generating content (Free)\n"
             "/chat - Talk to the AI Consultant (PRO)\n"
             "/bounties - View Bounty Scout (PRO)\n"
             "/cancel - Cancel current action\n"
             "/skip - Generate ideas (in Generate Mode)\n\n"
-            "**Features:**\n"
+            "FEATURES:\n"
             "✨ Analyze: Improve hooks & virality (Free/PRO)\n"
             "🎨 Generate: Create articles & threads (Free/PRO)\n"
             "💡 Consultant: Strategic advice (PRO Only)\n"
@@ -496,7 +496,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("Casual", callback_data=f'tone_casual')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text(f"Niche set to **{niche.capitalize()}**.\n\nSelect Tone:", reply_markup=reply_markup, parse_mode='Markdown')
+        await query.edit_message_text(f"Niche set to {niche.capitalize()}.\n\nSelect Tone:", reply_markup=reply_markup)
         
     elif data.startswith('tone_'):
         tone = data.split('_')[1]
@@ -510,7 +510,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("Educational", callback_data=f'mood_educational')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text(f"Tone set to **{tone.capitalize()}**.\n\nSelect Mood:", reply_markup=reply_markup, parse_mode='Markdown')
+        await query.edit_message_text(f"Tone set to {tone.capitalize()}.\n\nSelect Mood:", reply_markup=reply_markup)
         
     elif data.startswith('mood_'):
         mood = data.split('_')[1]
@@ -525,12 +525,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             tier_note = "\n\n(Note: Free tier results are limited to 1500 tokens. Upgrade to PRO for full-length, professional output.)" if not is_pro else ""
 
             await query.edit_message_text(
-                f"✅ Ready to Generate **{format_type.capitalize()}**\n"
+                f"✅ Ready to Generate {format_type.capitalize()}\n"
                 f"Niche: {niche.capitalize()}, Tone: {tone.capitalize()}, Mood: {mood.capitalize()}.\n\n"
-                f"Now, send me the **topic** or **hook** you want content written about.\n"
+                f"Now, send me the topic or hook you want content written about.\n"
                 f"Use /skip to generate content ideas instead."
                 f"{tier_note}"
-            , parse_mode='Markdown')
+            )
 
 # --- Message Handler ---
 
