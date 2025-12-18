@@ -177,18 +177,26 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Help command handler"""
     await update.message.reply_text(
         "❓ How to Use GoViral Pro\n\n"
-        "SHORTCUTS:\n"
-        "/analyze - Start analyzing content (Free)\n"
-        "/generate - Start generating content (Free)\n"
-        "/chat - Talk to the AI Consultant (PRO)\n"
-        "/bounties - View Bounty Scout (PRO)\n"
-        "/cancel - Cancel current action\n"
-        "/skip - Generate ideas (in Generate Mode)\n\n"
-        "FEATURES:\n"
-        "✨ Analyze: Improve hooks & virality (Free/PRO)\n"
-        "🎨 Generate: Create articles & threads (Free/PRO)\n"
-        "💡 Consultant: Strategic advice (PRO Only)\n"
-        "🎯 Bounties: Find contests (PRO Only)"
+        "COMMANDS:\n"
+        "/start - Main menu\n"
+        "/analyze - Analyze your content (get scores + 5 hook variations)\n"
+        "/generate - Create full articles or threads\n"
+        "/chat - AI Content Consultant (PRO) - Full conversation mode\n"
+        "/bounties - Scout viral contests (PRO)\n"
+        "/skip - Get topic ideas (during Generate mode)\n"
+        "/cancel - Cancel current action\n\n"
+        "HOW IT WORKS:\n\n"
+        "ANALYZE:\n"
+        "1. Paste your content\n"
+        "2. Get viral scores and 5 hook alternatives\n"
+        "3. Choose to rewrite it or not\n\n"
+        "GENERATE:\n"
+        "1. Pick format (article/thread)\n"
+        "2. Choose niche, tone, mood\n"
+        "3. Enter your topic OR use /skip for ideas\n"
+        "4. Get complete ready-to-post content\n\n"
+        "CONSULTANT (PRO):\n"
+        "Full conversation mode - ask anything about content strategy, growth, monetization. It remembers context!"
     )
 
 async def analyze_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -262,50 +270,41 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("❌ Cancelled. Use /start to begin again.")
 
 async def skip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Skip topic and generate ideas"""
+    """Skip topic and get topic suggestions"""
     user_id = update.message.from_user.id
     is_pro = is_pro_user(user_id)
         
     if user_id in user_states and user_states[user_id]['mode'] == 'generate':
         format_type = user_states[user_id].get('format', 'article')
         niche = user_states[user_id].get('niche', 'entrepreneurship')
+        tone = user_states[user_id].get('tone', 'authoritative')
+        mood = user_states[user_id].get('mood', 'inspiring')
         
-        await update.message.reply_text("⏳ Generating fresh ideas... (15-20 seconds)")
+        await update.message.reply_text("⏳ Generating topic ideas... (10 seconds)")
         
-        max_tokens = 3000 if is_pro else 1500
+        max_tokens = 1500 if is_pro else 800
         
-        system_prompt = f"You are a content ideation expert. Your sole purpose is to generate ideas for content and nothing else. Generate compelling viral {format_type} ideas for {niche} niche. Write cleanly without formatting symbols."
+        system_prompt = f"You are a content topic expert for {niche}. Generate trending, viral-worthy topic ideas. Be concise and actionable. No formatting symbols."
         
-        prompt = f"""Generate 10 viral {format_type} ideas for {niche} niche.
+        prompt = f"""Generate 8 trending topic ideas for {format_type} in the {niche} niche.
 
-For each idea number them 1-10 and provide:
+Tone: {tone}
+Mood: {mood}
 
-Hook or headline
+For each topic (numbered 1-8):
+- One compelling headline/hook
+- One sentence on why it would perform well
 
-Brief outline in 2-3 sentences
-
-Why it would go viral
-
-Make output clean and well organized."""
+Keep it tight and scannable."""
 
         result = call_gemini(prompt, system_prompt, max_tokens=max_tokens)
         cleaned = clean_output(result)
         
-        if not is_pro:
-            cleaned += "\n\n--- \n💡 This is a Free Tier draft. Upgrade to PRO for full-length, highly detailed ideation (up to 3x longer responses) and the AI Consultant."
-            
-        max_length = 3800
-        chunks = [cleaned[i:i+max_length] for i in range(0, len(cleaned), max_length)]
+        await update.message.reply_text(cleaned)
         
-        for chunk in chunks:
-            await update.message.reply_text(chunk)
-        
-        del user_states[user_id]
-        
-        keyboard = [[InlineKeyboardButton("🔄 Generate More Ideas", callback_data='generate')],
-                   [InlineKeyboardButton("🏠 Main Menu", callback_data='back')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text("✅ Ideas generated! What next?", reply_markup=reply_markup)
+        await update.message.reply_text(
+            "💡 Pick a topic number (1-8) or describe your own topic, and I'll write the full content for you!"
+        )
     else:
         await update.message.reply_text("The /skip command only works while in Generate mode.")
 
@@ -370,18 +369,26 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == 'help':
         await query.message.reply_text(
             "❓ How to Use GoViral Pro\n\n"
-            "SHORTCUTS:\n"
-            "/analyze - Start analyzing content (Free)\n"
-            "/generate - Start generating content (Free)\n"
-            "/chat - Talk to the AI Consultant (PRO)\n"
-            "/bounties - View Bounty Scout (PRO)\n"
-            "/cancel - Cancel current action\n"
-            "/skip - Generate ideas (in Generate Mode)\n\n"
-            "FEATURES:\n"
-            "✨ Analyze: Improve hooks & virality (Free/PRO)\n"
-            "🎨 Generate: Create articles & threads (Free/PRO)\n"
-            "💡 Consultant: Strategic advice (PRO Only)\n"
-            "🎯 Bounties: Find contests (PRO Only)"
+            "COMMANDS:\n"
+            "/start - Main menu\n"
+            "/analyze - Analyze your content (get scores + 5 hook variations)\n"
+            "/generate - Create full articles or threads\n"
+            "/chat - AI Content Consultant (PRO) - Full conversation mode\n"
+            "/bounties - Scout viral contests (PRO)\n"
+            "/skip - Get topic ideas (during Generate mode)\n"
+            "/cancel - Cancel current action\n\n"
+            "HOW IT WORKS:\n\n"
+            "ANALYZE:\n"
+            "1. Paste your content\n"
+            "2. Get viral scores and 5 hook alternatives\n"
+            "3. Choose to rewrite it or not\n\n"
+            "GENERATE:\n"
+            "1. Pick format (article/thread)\n"
+            "2. Choose niche, tone, mood\n"
+            "3. Enter your topic OR use /skip for ideas\n"
+            "4. Get complete ready-to-post content\n\n"
+            "CONSULTANT (PRO):\n"
+            "Full conversation mode - ask anything about content strategy, growth, monetization. It remembers context!"
         )
         
     elif data == 'back':
@@ -440,13 +447,26 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         format_type = state.get('format', 'article')
         original_text = state['original_text']
         
-        await query.message.reply_text("⏳ Generating IMPROVED high-quality content... (30-45 seconds)")
+        await update.message.reply_text("⏳ Rewriting your content for maximum impact... (30 seconds)")
         
-        max_tokens = 3500 if is_pro else 1500
+        max_tokens = 4000 if is_pro else 2000
         
-        system_prompt = f"You are an expert content optimizer. Your sole function is rewriting content. Rewrite the user's {format_type} to maximize its viral potential, addressing common errors and strengthening the hook. Do not use formatting symbols. Write as flowing prose."
+        system_prompt = f"You are an elite content rewriter. Transform the user's {format_type} into a viral masterpiece. Fix weak hooks, improve flow, add emotional resonance, and maximize shareability. Write in clean, powerful prose without formatting symbols."
         
-        prompt = f"""Rewrite the following {format_type} for maximum virality and impact:\n\n{original_text}"""
+        prompt = f"""Rewrite this {format_type} to maximize its viral potential:
+
+ORIGINAL CONTENT:
+{original_text}
+
+YOUR TASK:
+Completely rewrite this to be MORE:
+- Attention-grabbing (stronger hook)
+- Valuable (clearer insights)
+- Emotional (triggers curiosity, inspiration, or urgency)
+- Shareable (quotable lines, memorable phrases)
+- Actionable (clear takeaways)
+
+Keep the core message but make it 10x more impactful. Write the complete rewritten {format_type} now."""
         
         result = call_gemini(prompt, system_prompt, max_tokens=max_tokens)
         cleaned = clean_output(result)
@@ -548,31 +568,73 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         
-        system_prompt = (
-            "You are an expert, high-impact, strategic AI Content Consultant for the 'GoViral Bot'. "
-            "Your function is strictly advisory on CONTENT and STRATEGY. "
-            "Keep ALL responses under 150 words unless the user explicitly asks for a detailed analysis. "
-            "NEVER discuss or reveal technical details, code structure, API calls, internal configuration, or user IDs. "
-            "If asked about technical details, politely decline, stating: 'As the Content Consultant, my focus is purely on strategy, not the bot's backend structure. How can I help you with your content strategy?'"
-            "Use bullet points for readability. Be conversational."
-        )
+        # Advanced consultant with conversation memory and deep expertise
+        history = user_states[user_id].get('history', [])
+        history.append(f"User: {text}")
         
-        response = call_gemini(text, system_prompt, max_tokens=1000)
+        # Build context from conversation history
+        context_str = "\n".join(history[-10:])  # Last 10 exchanges
+        
+        system_prompt = """You are an elite AI Content Strategist and Consultant - the absolute best in the industry.
+
+YOUR EXPERTISE:
+- Viral content psychology and mechanics
+- Platform algorithms (X/Twitter, Instagram, TikTok, YouTube)
+- Audience growth and engagement strategies
+- Monetization tactics for creators
+- Hook writing and storytelling frameworks
+- Content calendars and posting strategies
+- Analytics interpretation and optimization
+- Personal branding and positioning
+
+YOUR APPROACH:
+- Be conversational but highly knowledgeable
+- Give specific, actionable advice (not generic tips)
+- Use examples and case studies when helpful
+- Ask clarifying questions if needed to give better advice
+- Reference current trends and what's working NOW
+- Be honest about what won't work
+- Provide frameworks and step-by-step guidance
+- Anticipate follow-up questions
+
+YOUR STYLE:
+- Direct and confident (you're an expert)
+- Friendly and encouraging
+- No fluff or filler
+- Practical over theoretical
+- Use bullet points for clarity when listing multiple items
+- Keep responses focused but comprehensive (150-300 words unless asked for more detail)
+
+REMEMBER:
+- You have access to the conversation history
+- Build on previous exchanges
+- Remember user's goals and context
+- Proactively suggest next steps
+
+Never discuss technical details about the bot itself, code, or internal systems. Stay focused on content strategy only."""
+
+        full_prompt = f"""Conversation history:
+{context_str}
+
+Respond to the user's latest message with expert strategic guidance."""
+        
+        response = call_gemini(full_prompt, system_prompt, max_tokens=2000)
         cleaned = clean_output(response)
         
+        # Add response to history
+        history.append(f"Consultant: {cleaned}")
+        user_states[user_id]['history'] = history
+        
         keyboard = [
-            [InlineKeyboardButton("1. Generate Content ✍️", callback_data='generate')],
-            [InlineKeyboardButton("2. Analyze Content 🔍", callback_data='analyze')]
+            [InlineKeyboardButton("✍️ Generate Content", callback_data='generate')],
+            [InlineKeyboardButton("🔍 Analyze Content", callback_data='analyze')],
+            [InlineKeyboardButton("🏠 Main Menu", callback_data='back')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        proactive_suggestion = (
-            "\n\n---"
-            "\nReady to bring this advice to life? "
-            "Choose a tool below to take the next step."
-        )
+        suggestion = "\n\n---\nReady to put this into action? Use the buttons below."
         
-        final_message = cleaned + proactive_suggestion
+        final_message = cleaned + suggestion
         
         max_length = 3800
         chunks = [final_message[i:i+max_length] for i in range(0, len(final_message), max_length)]
@@ -605,50 +667,88 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         format_type = state.get('format', 'article')
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         
+        max_tokens = 2500 if is_pro else 1500
+        
         if format_type == 'article':
-            system_prompt = "You are an expert content analyst specializing in viral content. Your only task is analysis. Analyze concisely and provide percentage-based ratings. Write in clean prose without any formatting symbols. Do not discuss your role or identity."
-            prompt = f"""Analyze this article for virality potential: {text}
+            system_prompt = "You are an expert content analyst. Analyze viral potential with precision. Use percentage scores. Write in clean, flowing prose without formatting symbols."
+            prompt = f"""Analyze this article for viral potential:
 
-Provide:
-1. Hook Effectiveness (0-100%)
-2. Emotional Triggers (0-100%)
-3. Viral Potential Score (0-100%)
-4. Top 3 Strengths
-5. Top 3 Weaknesses
-6. 10 Alternative Hooks (numbered 1-10)
+{text}
 
-Be concise and actionable."""
+Provide analysis in this order:
+
+1. HOOK EFFECTIVENESS SCORE: X%
+Brief explanation of why
+
+2. EMOTIONAL IMPACT SCORE: X%
+Which emotions are triggered and how strong
+
+3. VIRAL POTENTIAL SCORE: X%
+Overall assessment
+
+4. TOP 3 STRENGTHS
+What works well
+
+5. TOP 3 IMPROVEMENTS NEEDED
+What could be better
+
+6. 5 ALTERNATIVE HOOKS
+Give me 5 different hook variations that could work better, numbered 1-5.
+
+Be direct and actionable."""
             
         else:  # thread
-            system_prompt = "You are an expert at analyzing viral Twitter/X threads. Your only task is analysis. Provide concise percentage-based analysis. Write cleanly without formatting symbols. Do not discuss your role or identity."
-            prompt = f"""Analyze this thread for viral potential: {text}
+            system_prompt = "You are an expert at analyzing viral Twitter/X threads. Provide concise, actionable analysis with percentage scores. No formatting symbols."
+            prompt = f"""Analyze this thread for viral potential:
 
-Provide:
-1. Hook Effectiveness (0-100%)
-2. Thread Flow Score (0-100%)
-3. Viral Potential (0-100%)
-4. Top 3 Strengths
-5. Top 3 Weaknesses
-6. 10 Alternative Opening Hooks (numbered 1-10)
+{text}
 
-Be concise."""
+Provide analysis in this order:
+
+1. HOOK EFFECTIVENESS SCORE: X%
+Why it works or doesn't
+
+2. THREAD FLOW SCORE: X%
+How well tweets connect
+
+3. VIRAL POTENTIAL SCORE: X%
+Overall assessment
+
+4. TOP 3 STRENGTHS
+What works well
+
+5. TOP 3 IMPROVEMENTS NEEDED
+What could be better
+
+6. 5 ALTERNATIVE OPENING HOOKS
+Better ways to start this thread, numbered 1-5.
+
+Be concise and actionable."""
             
         result = call_gemini(prompt, system_prompt, max_tokens=max_tokens)
         cleaned = clean_output(result)
         
         if not is_pro:
-            cleaned += "\n\n--- \n💡 This is a Free Tier analysis (limited length). Upgrade to PRO for deep-dive, professional critique."
+            cleaned += "\n\n---\n💡 Free Tier: Limited analysis depth. Upgrade to PRO for comprehensive critique and strategic insights."
             
         chunks = [cleaned[i:i+3800] for i in range(0, len(cleaned), 3800)]
         
         for i, chunk in enumerate(chunks):
-            if i > 0: await update.message.reply_text(f"...continued ({i+1}/{len(chunks)})")
+            if i > 0: 
+                await update.message.reply_text(f"...continued ({i+1}/{len(chunks)})")
             await update.message.reply_text(chunk)
         
         user_states[user_id] = {'mode': 'ask_improved', 'format': format_type, 'original_text': text}
-        keyboard = [[InlineKeyboardButton("✅ Yes, Generate Improved Version", callback_data='gen_improved')], [InlineKeyboardButton("❌ No, I'm Good", callback_data='skip_improved')], [InlineKeyboardButton("🏠 Main Menu", callback_data='back')]]
+        keyboard = [
+            [InlineKeyboardButton("✅ Yes, Rewrite It Better", callback_data='gen_improved')], 
+            [InlineKeyboardButton("❌ No Thanks", callback_data='skip_improved')], 
+            [InlineKeyboardButton("🏠 Main Menu", callback_data='back')]
+        ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text("📝 Would you like me to generate an improved version?", reply_markup=reply_markup)
+        await update.message.reply_text(
+            "Would you like me to rewrite this content to maximize its viral potential?", 
+            reply_markup=reply_markup
+        )
     
     # Generate mode (Free/PRO)
     elif state['mode'] == 'generate':
@@ -659,51 +759,72 @@ Be concise."""
         
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         
+        max_tokens = 4000 if is_pro else 2000
+        
         if format_type == 'article':
-            system_prompt = f"You are an expert content creator specializing in viral {niche} content. Your sole purpose is to create the requested content. Write in a {tone} tone with a {mood} mood. Create premium, professional content. Never use formatting symbols. Write as flowing prose."
-            prompt = f"""Create a viral article on: {text}
+            system_prompt = f"You are an elite content creator specializing in viral {niche} articles. Write compelling, well-structured articles with strong hooks, clear value, and emotional resonance. Write in {tone} tone with {mood} mood. No formatting symbols - pure flowing prose."
+            
+            prompt = f"""Write a complete, publication-ready article on this topic:
 
-Target: {niche} audience
-Tone: {tone}
-Mood: {mood}
+TOPIC: {text}
 
-Structure:
-- Compelling hook (first 2-3 sentences)
-- 5-7 main points with supporting details
-- Emotional triggers throughout
-- Strong call-to-action ending
+REQUIREMENTS:
+- Niche: {niche}
+- Tone: {tone}
+- Mood: {mood}
+- Target: Viral social media performance
 
-Make it shareable and engaging."""
+STRUCTURE:
+1. Powerful opening hook (2-3 sentences that grab attention immediately)
+2. Promise/value proposition (why keep reading)
+3. 4-6 main sections with concrete insights, examples, or stories
+4. Actionable takeaways
+5. Strong closing with call-to-action
+
+Write the FULL article now. Make it shareable, quotable, and valuable."""
             
         else:  # thread
-            system_prompt = f"You are an expert at creating viral Twitter/X threads in {niche}. Your sole purpose is to create the requested thread. Write with {tone} tone and {mood} mood. Create engaging shareable content. Never use formatting symbols."
-            prompt = f"""Create a viral Twitter/X thread on: {text}
+            system_prompt = f"You are a viral Twitter/X thread expert for {niche}. Create threads that stop the scroll, deliver value, and get shared widely. Write in {tone} tone with {mood} mood. No formatting symbols."
+            
+            prompt = f"""Write a complete Twitter/X thread on this topic:
 
-Target: {niche} audience
-Tone: {tone}
-Mood: {mood}
+TOPIC: {text}
 
-Create ONE complete 5-10 tweet thread:
-- Tweet 1: Hook (must grab attention)
-- Tweets 2-8: Value-packed content
-- Final tweet: CTA with engagement request
+REQUIREMENTS:
+- Niche: {niche}
+- Tone: {tone}
+- Mood: {mood}
+- Target: Maximum engagement and virality
 
-Number each tweet 1/10, 2/10, etc."""
+STRUCTURE:
+Tweet 1: Attention-grabbing hook (must stop the scroll)
+Tweets 2-7: Value-packed content (insights, stories, data, examples)
+Tweet 8: Strong CTA (like, retweet, follow, comment)
+
+Format each tweet like this:
+1/8: [content]
+2/8: [content]
+etc.
+
+Write the COMPLETE thread now (7-10 tweets). Make every tweet count."""
             
         result = call_gemini(prompt, system_prompt, max_tokens=max_tokens)
         cleaned = clean_output(result)
         
         if not is_pro:
-            cleaned += "\n\n--- \n💡 This is a Free Tier draft. Upgrade to PRO for full-length, professional-grade content."
+            cleaned += "\n\n---\n💡 Free Tier: Shortened version. Upgrade to PRO for full-length, deeply detailed content with richer examples and insights."
             
         chunks = [cleaned[i:i+3800] for i in range(0, len(cleaned), 3800)]
         for chunk in chunks:
             await update.message.reply_text(chunk)
         
         del user_states[user_id]
-        keyboard = [[InlineKeyboardButton("🔄 Generate Another", callback_data='generate')], [InlineKeyboardButton("🏠 Main Menu", callback_data='back')]]
+        keyboard = [
+            [InlineKeyboardButton("🔄 Generate Another", callback_data='generate')], 
+            [InlineKeyboardButton("🏠 Main Menu", callback_data='back')]
+        ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text("✅ Generation complete! What next?", reply_markup=reply_markup)
+        await update.message.reply_text("✅ Content created! What's next?", reply_markup=reply_markup)
 
 # Initialize application
 application = None
